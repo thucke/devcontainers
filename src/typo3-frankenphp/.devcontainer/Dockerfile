@@ -33,3 +33,7 @@ RUN apt-get update && \
 COPY php.ini /usr/local/etc/php/php.ini
 
 COPY typo3.caddyfile /etc/frankenphp/Caddyfile
+
+VOLUME [ "/usr/local/etc/php/php.ini/data" ]
+VOLUME [ "/etc/frankenphp/Caddyfile/data" ]
+VOLUME [ "${WORKSPACE_ROOT" ]
