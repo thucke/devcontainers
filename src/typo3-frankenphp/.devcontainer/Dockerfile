@@ -7,7 +7,7 @@ ARG COMPOSE_PROFILES
 ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
 ENV COMPOSE_PROFILES=${COMPOSE_PROFILES}
-ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspace}
+ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}
 
 USER root
 
@@ -34,6 +34,7 @@ COPY php.ini /usr/local/etc/php/php.ini
 
 COPY typo3.caddyfile /etc/frankenphp/Caddyfile
 
-VOLUME [ "/usr/local/etc/php/php.ini/data" ]
-VOLUME [ "/etc/frankenphp/Caddyfile/data" ]
-VOLUME [ "${WORKSPACE_ROOT" ]
+VOLUME [ "/usr/local/etc/php/php.ini" ]
+VOLUME [ "/etc/frankenphp/Caddyfile" ]
+VOLUME [ "${WORKSPACE_ROOT}" ]
+VOLUME [ "${WORKSPACE_ROOT}/.build" ]
