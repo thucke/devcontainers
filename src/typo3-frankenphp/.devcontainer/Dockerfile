@@ -2,11 +2,9 @@ FROM dunglas/frankenphp:php8.4-trixie
 
 ARG DEVCONTAINER_SERVICE_ID
 ARG DEVCONTAINER_SERVICE_NAME
-ARG COMPOSE_PROFILES
 
 ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
-ENV COMPOSE_PROFILES=${COMPOSE_PROFILES}
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}
 
 USER root
@@ -17,7 +15,6 @@ RUN addgroup --gid ${DEVCONTAINER_SERVICE_ID} ${DEVCONTAINER_SERVICE_NAME} && \
         --disabled-password --shell /bin/false --uid ${DEVCONTAINER_SERVICE_ID} $DEVCONTAINER_SERVICE_NAME
 
 RUN apt-get update && \
-    mkdir -vp var/log && \
     apt-get install -y \
         locales-all \
         openssh-client \
@@ -33,8 +30,3 @@ RUN apt-get update && \
 COPY php.ini /usr/local/etc/php/php.ini
 
 COPY typo3.caddyfile /etc/frankenphp/Caddyfile
-
-VOLUME [ "/usr/local/etc/php/php.ini" ]
-VOLUME [ "/etc/frankenphp/Caddyfile" ]
-VOLUME [ "${WORKSPACE_ROOT}" ]
-VOLUME [ "${WORKSPACE_ROOT}/.build" ]

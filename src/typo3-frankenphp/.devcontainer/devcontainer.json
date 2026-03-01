@@ -7,8 +7,7 @@
 		"dockerfile": "Dockerfile",
 		"args": {
 			"DEVCONTAINER_SERVICE_NAME": "devcontainer",
-			"DEVCONTAINER_SERVICE_ID": "10000",
-			"COMPOSE_PROFILES": "frankenphp"
+			"DEVCONTAINER_SERVICE_ID": "10000"
 		}
 	},
 	"customizations": {
