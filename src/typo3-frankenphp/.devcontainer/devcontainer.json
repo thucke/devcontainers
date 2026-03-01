@@ -7,46 +7,9 @@
 		"dockerfile": "Dockerfile",
 		"args": {
 			"DEVCONTAINER_SERVICE_NAME": "devcontainer",
-			"DEVCONTAINER_SERVICE_ID": "10000",
-			"COMPOSE_PROFILES": "frankenphp"
+			"DEVCONTAINER_SERVICE_ID": "10000"
 		}
 	},
-	"workspaceFolder": "/workspace/${localWorkspaceFolderBasename}",
-	"mounts": [
-		"source=${localWorkspaceFolderBasename}-build,target=${containerWorkspaceFolder}/.build,type=volume"
-	],
-	"features": {
-		"ghcr.io/devcontainers/features/sshd:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"moby": false
-		}
-	},
-	"containerEnv": {
-		"WORKSPACE_ROOT": "${containerWorkspaceFolder:-/workspace}",
-		"TYPO3_INSTALL_WEB_SERVER_CONFIG": "other",
-		"SERVER_NAME": "127.0.0.1"
-	},
-	"forwardPorts": [
-		80,
-		2222,
-		3306,
-		8080
-	],
-	"portsAttributes": {
-		"80": {
-			"label": "Webserver"
-		},
-		"2222": {
-			"label": "SSH daemon Port"
-		},
-		"3306": {
-			"label": "Mysql/MariaDB database"
-		},
-		"8080": {
-			"label": "Mysql Adminer"
-		}
-	},
-	"onCreateCommand": "chmod -c +x ${WORKSPACE_ROOT}/.devcontainer/onCreateCommandScript.sh && ${WORKSPACE_ROOT}/.devcontainer/onCreateCommandScript.sh",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -56,6 +19,10 @@
 				"debug.openDebug": "openOnDebugBreak",
 				"debug.internalConsoleOptions": "openOnSessionStart",
 				"extensions.autoUpdate": false,
+				"editor.selectionHighlight": false,
+				"editor.suggestSelection": "first",
+				"editor.tabCompletion": "onlySnippets",
+				"editor.wordBasedSuggestions": "off",
 				"editor.codeActionsOnSave": {
 					"source.fixAll.markdownlint": "explicit"
 				},
