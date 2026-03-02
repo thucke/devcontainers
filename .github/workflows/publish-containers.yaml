@@ -61,7 +61,7 @@ jobs:
         id: read-from-ghactions-property-file
         uses: christian-draeger/read-properties@1.1.1
         with:
-          path: "${{ matrix.folder }}/ghaction.properties"
+          path: "src/${{ matrix.folder }}/ghaction.properties"
           properties: 'imagetag'
         continue-on-error: true
 
