@@ -57,14 +57,11 @@ jobs:
         run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
 
       # read image tag from subdirectory propery file if exists
-      - uses: aarcangeli/load-dotenv@v1.1.0
-        id: read-from-ghactions-env-file
+      - uses: xom9ikk/dotenv@v2.3.0
         with:
           path: "src/${{ matrix.folder }}"
-          filenames: 'ghaction.env'
-          quiet: 'false'
-          if-file-not-found: 'ignore'
-          expand: 'true'
+          mode: ''
+          load-mode: 'skip'
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
 
@@ -83,7 +80,7 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
-          imageTag: ${{ steps.read-from-ghactions-env-file.outputs.imagetag || 'latest' }}
+          imageTag: ${{ env.imagetag || 'latest' }}
           cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}:${{ steps.read-from-ghactions-env-file.outputs.imagetag || 'latest' }}
           refFilterForPush: "refs/heads/main"
         env: 
