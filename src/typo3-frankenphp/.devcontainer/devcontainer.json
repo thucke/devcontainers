@@ -1,13 +1,15 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
-	"name": "FrankenPHP 8.4, MariaDB (Dockerfile)",
+	"name": "FrankenPHP, PHP ${localEnv:PHP_VERSION}, MariaDB (Dockerfile)",
 	"build": {
 		"context": ".",
 		"dockerfile": "Dockerfile",
 		"args": {
 			"DEVCONTAINER_SERVICE_NAME": "devcontainer",
-			"DEVCONTAINER_SERVICE_ID": "10000"
+			"DEVCONTAINER_SERVICE_ID": "10000",
+			"COMPOSE_PROFILES": "frankenphp",
+			"PHP_VERSION": "${localEnv:PHP_VERSION}"
 		}
 	},
 	"customizations": {

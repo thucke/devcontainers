@@ -41,6 +41,7 @@ jobs:
     strategy:
       matrix:
         folder: ${{ fromJson(needs.list-files.outputs.folders) }}
+        php_version: [8.5, 8.4, 8.3, 8.2]
     permissions:
       contents: read
       packages: write
@@ -54,6 +55,15 @@ jobs:
       - name: Get lowercase repo name
         id: lowercase-repo
         run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+
+      # read image tag from subdirectory propery file if exists
+      - uses: xom9ikk/dotenv@v2.3.0
+        with:
+          path: "src/${{ matrix.folder }}"
+          mode: ''
+          load-mode: 'skip'
+        env: 
+          PHP_VERSION: ${{ matrix.php_version }}
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -70,5 +80,8 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
-          cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
+          imageTag: ${{ env.imagetag || 'latest' }}
+          cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}:${{ env.imagetag || 'latest' }}
           refFilterForPush: "refs/heads/main"
+        env: 
+          PHP_VERSION: ${{ matrix.php_version }}
