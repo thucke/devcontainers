@@ -73,5 +73,5 @@ jobs:
           imageName: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
           cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
           refFilterForPush: "refs/heads/main"
-          env: |
-            PHP_VERSION=${{ matrix.php_version }}
+        env: 
+          PHP_VERSION: ${{ matrix.php_version }}
