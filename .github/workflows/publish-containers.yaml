@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         folder: ${{ fromJson(needs.list-files.outputs.folders) }}
-        PHP_VERSION: [8.5, 8.4, 8.3, 8.2 ]
+        php_version: [8.5, 8.4, 8.3, 8.2]
     permissions:
       contents: read
       packages: write
@@ -73,3 +73,5 @@ jobs:
           imageName: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
           cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
           refFilterForPush: "refs/heads/main"
+        env:
+          PHP_VERSION: ${{ matrix.php_version }}
