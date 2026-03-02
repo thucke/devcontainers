@@ -9,7 +9,7 @@
 			"DEVCONTAINER_SERVICE_NAME": "devcontainer",
 			"DEVCONTAINER_SERVICE_ID": "10000",
 			"COMPOSE_PROFILES": "frankenphp",
-			"PHP_VERSION": "${PHP_VERSION:-8.4}"
+			"PHP_VERSION": "${PHP_VERSION}"
 		}
 	},
 	"customizations": {
