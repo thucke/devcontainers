@@ -65,10 +65,6 @@ jobs:
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
 
-      - run: |
-          echo ${{ steps.dotenv.outputs.imagetag }} 
-          env
-
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
