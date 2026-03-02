@@ -58,7 +58,6 @@ jobs:
 
       # read image tag from subdirectory propery file if exists
       - uses: xom9ikk/dotenv@v2.3.0
-        id: dotenv
         with:
           path: "src/${{ matrix.folder }}"
           mode: ''
@@ -85,8 +84,8 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
-          imageTag: ${{ steps.dotenv.outputs.imagetag || 'latest' }}
-          cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}:${{ steps.dotenv.outputs.imagetag || 'latest' }}
+          imageTag: ${{ env.imagetag || 'latest' }}
+          cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}:${{ env.imagetag || 'latest' }}
           refFilterForPush: "refs/heads/main"
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
