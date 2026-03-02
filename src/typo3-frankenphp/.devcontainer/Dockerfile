@@ -1,4 +1,6 @@
-FROM dunglas/frankenphp:php8.4-trixie
+ARG PHP_VERSION=${PHP_VERSION:-8.4}
+
+FROM dunglas/frankenphp:1-php${PHP_VERSION}-trixie
 
 ARG DEVCONTAINER_SERVICE_ID
 ARG DEVCONTAINER_SERVICE_NAME
@@ -27,6 +29,4 @@ RUN apt-get update && \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-COPY php.ini /usr/local/etc/php/php.ini
-
-COPY typo3.caddyfile /etc/frankenphp/Caddyfile
+ENTRYPOINT [ "/bin/bash" ]

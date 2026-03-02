@@ -41,6 +41,7 @@ jobs:
     strategy:
       matrix:
         folder: ${{ fromJson(needs.list-files.outputs.folders) }}
+        PHP_VERSION: [8.5, 8.4, 8.3, 8.2 ]
     permissions:
       contents: read
       packages: write
