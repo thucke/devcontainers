@@ -56,6 +56,15 @@ jobs:
         id: lowercase-repo
         run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
 
+      # read image tag from subdirectory propery file if exists
+      - name: Read value from Properties-file
+        id: read-from-ghactions-property-file
+        uses: christian-draeger/read-properties@1.1.1
+        with:
+          path: "${{ matrix.folder }}/ghaction.properties"
+          properties: 'imagetag'
+        continue-on-error: true
+
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
@@ -71,7 +80,8 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
-          cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
+          imageTag: ${{ steps.read-from-ghactions-property-file.outputs.imagetag || 'latest' }}
+          cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}:${{ steps.read-from-ghactions-property-file.outputs.imagetag || 'latest' }}
           refFilterForPush: "refs/heads/main"
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
