@@ -64,6 +64,8 @@ jobs:
           path: "src/${{ matrix.folder }}/ghaction.properties"
           properties: 'imagetag'
         continue-on-error: true
+        env: 
+          PHP_VERSION: ${{ matrix.php_version }}
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
