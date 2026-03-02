@@ -62,9 +62,9 @@ jobs:
         with:
           path: "src/${{ matrix.folder }}"
           filenames: 'ghaction.env'
-          quiet: false
+          quiet: 'false'
           if-file-not-found: 'ignore'
-          expand: true
+          expand: 'true'
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
 
