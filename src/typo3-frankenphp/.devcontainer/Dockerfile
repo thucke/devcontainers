@@ -23,6 +23,7 @@ RUN apt-get update && \
         vim \
         procps \
         unzip \
+        lsb-release \
         mariadb-client && \
     apt-get install -y iproute2 iputils-ping && \
     install-php-extensions calendar bcmath exif ftp mysqli pdo pdo_mysql gmp intl zip \
