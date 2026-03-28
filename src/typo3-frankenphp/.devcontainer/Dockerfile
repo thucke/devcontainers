@@ -13,12 +13,13 @@ USER root
 
 EXPOSE 80 443
 RUN addgroup --gid ${DEVCONTAINER_SERVICE_ID} ${DEVCONTAINER_SERVICE_NAME} && \
-    adduser --gid ${DEVCONTAINER_SERVICE_ID} --no-create-home --home /nonexistent --comment "devcontainer service user" \
-        --disabled-password --shell /bin/false --uid ${DEVCONTAINER_SERVICE_ID} $DEVCONTAINER_SERVICE_NAME
+    adduser --gid ${DEVCONTAINER_SERVICE_ID} --home /home/${DEVCONTAINER_SERVICE_NAME} --comment "devcontainer service user" \
+        --disabled-password --shell /bin/bash --uid ${DEVCONTAINER_SERVICE_ID} $DEVCONTAINER_SERVICE_NAME
 
 RUN apt-get update && \
     apt-get install -y \
         locales-all \
+        sudo \
         openssh-client \
         vim \
         procps \
@@ -28,6 +29,12 @@ RUN apt-get update && \
     apt-get install -y iproute2 iputils-ping && \
     install-php-extensions calendar bcmath exif ftp mysqli pdo pdo_mysql gmp intl zip \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
+    mkdir -v -m 777 ${WORKSPACE_ROOT}
 
-ENTRYPOINT [ "/bin/bash" ]
+COPY ./allsudoers /etc/sudoers.d/allsudoers
+COPY ./docker-entrypoint.sh /
+
+USER ${DEVCONTAINER_SERVICE_NAME}
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
