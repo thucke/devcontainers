@@ -30,7 +30,7 @@ RUN apt-get update && \
     install-php-extensions calendar bcmath exif ftp mysqli pdo pdo_mysql gmp intl zip \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
-    mkdir ${WORKSPACE_ROOT} && cmod 777 ${WORKSPACE_ROOT}
+    mkdir -v -m 777 ${WORKSPACE_ROOT}
 
 COPY ./allsudoers /etc/sudoers.d/allsudoers
 COPY ./docker-entrypoint.sh /
