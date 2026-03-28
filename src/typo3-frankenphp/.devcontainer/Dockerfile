@@ -30,4 +30,8 @@ RUN apt-get update && \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENTRYPOINT [ "/bin/bash" ]
+COPY ./docker-entrypoint.sh /
+
+USER ${DEVCONTAINER_SERVICE_NAME}
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
