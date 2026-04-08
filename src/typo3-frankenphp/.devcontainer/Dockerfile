@@ -25,7 +25,8 @@ RUN apt-get update && \
         procps \
         unzip \
         lsb-release \
-        mariadb-client && \
+        mariadb-client \
+        sqlite3 && \
     apt-get install -y iproute2 iputils-ping && \
     install-php-extensions calendar bcmath exif ftp mysqli pdo pdo_mysql gmp intl zip \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
