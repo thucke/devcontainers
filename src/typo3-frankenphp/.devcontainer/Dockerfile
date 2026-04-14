@@ -26,9 +26,10 @@ RUN apt-get update && \
         unzip \
         lsb-release \
         mariadb-client \
-        sqlite3 && \
+        sqlite3 \
+        postgresql-client && \
     apt-get install -y iproute2 iputils-ping && \
-    install-php-extensions calendar bcmath exif ftp mysqli pdo pdo_mysql gmp intl zip \
+    install-php-extensions calendar bcmath exif ftp mysqli pdo pdo_mysql pdo_pgsql pgsql gmp intl zip \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     mkdir -v -m 777 ${WORKSPACE_ROOT}
