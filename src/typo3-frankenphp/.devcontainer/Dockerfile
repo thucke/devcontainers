@@ -7,6 +7,9 @@ ARG DEVCONTAINER_SERVICE_NAME
 
 ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
+ENV TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
+
+# should be set by devcontainer.json, but we set it here as well to be sure
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}
 
 USER root
@@ -17,8 +20,9 @@ RUN addgroup --gid ${DEVCONTAINER_SERVICE_ID} ${DEVCONTAINER_SERVICE_NAME} && \
         --disabled-password --shell /bin/bash --uid ${DEVCONTAINER_SERVICE_ID} $DEVCONTAINER_SERVICE_NAME
 
 RUN apt-get update && \
+    apt-get upgrade -y && \
     apt-get install -y \
-        locales-all \
+        locales locales-all \
         sudo \
         openssh-client \
         vim \
@@ -28,7 +32,8 @@ RUN apt-get update && \
         mariadb-client \
         sqlite3 \
         postgresql-client && \
-    apt-get install -y iproute2 iputils-ping && \
+    update-locale LANG=en_US.UTF-8 &&\
+    #apt-get install -y iproute2 iputils-ping && \
     install-php-extensions calendar bcmath exif ftp mysqli pdo pdo_mysql pdo_pgsql pgsql gmp intl zip \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
@@ -38,5 +43,6 @@ COPY ./allsudoers /etc/sudoers.d/allsudoers
 COPY ./docker-entrypoint.sh /
 
 USER ${DEVCONTAINER_SERVICE_NAME}
+WORKDIR ${WORKSPACE_ROOT}
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
