@@ -13,7 +13,8 @@ ENV TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
 
 # should be set by devcontainer.json, but we set it here as well to be sure
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}
-ENV APACHE_DOCUMENT_ROOT=${WORKSPACE_ROOT}/.build/public
+ENV TZ=UTC
+ENV LANG=en_US.UTF-8
 
 EXPOSE 80 443
 USER root
@@ -53,14 +54,14 @@ RUN apt-get update && \
         gd imagick xdebug opcache tokenizer json iconv mbstring curl phar session simplexml xml @composer && \
     apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     mkdir -v -m 777 ${WORKSPACE_ROOT} && \
-    echo "UseCanonicalName On" >>/etc/apache2/apache2.conf && \
-    ln -sfr /etc/apache2/mods-available/expires.load /etc/apache2/mods-enabled/expires.load && \
-    ln -sfr /etc/apache2/mods-available/headers.load /etc/apache2/mods-enabled/headers.load && \
+    sed -ri -e "s/www-data/${DEVCONTAINER_SERVICE_NAME}/g" /etc/apache2/envvars && \
+    find /etc/apache2/sites-enabled -name "*.conf" -exec a2dissite {} \; && \
+    find /etc/apache2/sites-enabled -name "*.conf" -exec rm -fv {} \; && \
     ##################################################################################
     # configuration according to https://docs.typo3.org/m/typo3/reference-coreapi/main/en-us/Administration/Installation/SystemRequirements/Index.html#using-typo3-with-docker-based-environments
     ##################################################################################
-    # Enable Apache mod_rewrite
-    a2enmod rewrite
+    # Enable Apache modules
+    a2enmod expires headers rewrite
 
 COPY ./allsudoers /etc/sudoers.d/allsudoers
 COPY ./docker-entrypoint.sh /
