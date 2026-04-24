@@ -15,7 +15,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  list-files:
+  cleanup:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -39,5 +39,5 @@ jobs:
       - name: Delete untagged images
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          package: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
+          package: ${{ matrix.package }}
           delete-untagged: true
