@@ -1,4 +1,4 @@
-name: Docker
+name: Cleanup packages
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -15,7 +15,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  list-files:
+  cleanup:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Get lowercase repo name
         id: lowercase-repo
-        run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+        run: echo "repo=$(echo ${GITHUB_REPOSITORY@L}|cut -d/ -f2)" >> $GITHUB_OUTPUT
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -39,5 +39,5 @@ jobs:
       - name: Delete untagged images
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          package: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
+          package: ${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
           delete-untagged: true
