@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Get lowercase repo name
         id: lowercase-repo
-        run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+        run: echo "repo=$(echo ${GITHUB_REPOSITORY@L}|cut -d/ -f2)" >> $GITHUB_OUTPUT
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -39,5 +39,5 @@ jobs:
       - name: Delete untagged images
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          package: devcontainers/${{ matrix.package }}
+          package: ${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
           delete-untagged: true
