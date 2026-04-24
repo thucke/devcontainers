@@ -1,0 +1,43 @@
+name: Docker
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  workflow_dispatch:
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  list-files:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [typo3-frankenphp, typo3-apache]
+    permissions:
+      packages: write
+    steps:
+      - name: Get lowercase repo name
+        id: lowercase-repo
+        run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Delete untagged images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
+          delete-untagged: true

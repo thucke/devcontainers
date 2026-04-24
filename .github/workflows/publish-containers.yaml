@@ -85,8 +85,3 @@ jobs:
           refFilterForPush: "refs/heads/main"
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
-      - name: Delete untagged images
-        uses: dataaxiom/ghcr-cleanup-action@v1
-        with:
-          package: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
-          delete-untagged: true
