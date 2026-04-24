@@ -67,6 +67,12 @@ COPY ./allsudoers /etc/sudoers.d/allsudoers
 COPY ./docker-entrypoint.sh /
 
 USER ${DEVCONTAINER_SERVICE_NAME}
+
+# add devcontainer cli (https://github.com/devcontainers/cli)
+ADD --chmod=0755 --chown=${DEVCONTAINER_SERVICE_NAME}:${DEVCONTAINER_SERVICE_NAME} https://raw.githubusercontent.com/devcontainers/cli/main/scripts/install.sh /home/${DEVCONTAINER_SERVICE_NAME}/.devcontainers/bin/
+ENV PATH="$PATH:/home/${DEVCONTAINER_SERVICE_NAME}/.devcontainers/bin"
+RUN /home/${DEVCONTAINER_SERVICE_NAME}/.devcontainers/bin/install.sh
+
 WORKDIR ${WORKSPACE_ROOT}
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
