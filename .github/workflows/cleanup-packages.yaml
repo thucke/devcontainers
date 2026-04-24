@@ -39,5 +39,5 @@ jobs:
       - name: Delete untagged images
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          package: ${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
+          package: devcontainers/${{ matrix.package }}
           delete-untagged: true
