@@ -9,6 +9,8 @@ ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
 ENV TYPO3_INSTALL_WEB_SERVER_CONFIG=other
 
+LABEL dev.containers.servicetype="devcontainer"
+
 # should be set by devcontainer.json, but we set it here as well to be sure
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}
 ENV TZ=UTC
@@ -31,6 +33,7 @@ RUN apt-get update && \
         procps \
         unzip \
         lsb-release \
+        netcat-openbsd \
         mariadb-client \
         sqlite3 \
         postgresql-client && \
