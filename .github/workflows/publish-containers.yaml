@@ -57,13 +57,13 @@ jobs:
         run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
 
       # read image tag from subdirectory propery file if exists
-      - uses: xom9ikk/dotenv@v2.3.0
-        with:
-          path: "src/${{ matrix.folder }}"
-          mode: ''
-          load-mode: 'skip'
-        env: 
-          PHP_VERSION: ${{ matrix.php_version }}
+      #- uses: xom9ikk/dotenv@v2.3.0
+      #  with:
+      #    path: "src/${{ matrix.folder }}"
+      #    mode: ''
+      #    load-mode: 'skip'
+      #  env: 
+      #    PHP_VERSION: ${{ matrix.php_version }}
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action

@@ -9,7 +9,10 @@
 			"DEVCONTAINER_SERVICE_NAME": "typo3dev",
 			"DEVCONTAINER_SERVICE_ID": "10000",
 			"PHP_VERSION": "${localEnv:PHP_VERSION}"
-		}
+		},
+		"options": [
+			"--tag=php${localEnv:PHP_VERSION}-trixie"
+		]
 	},
 	"customizations": {
 		"vscode": {
