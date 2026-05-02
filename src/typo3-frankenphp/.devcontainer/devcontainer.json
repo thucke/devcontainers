@@ -11,7 +11,8 @@
 			"PHP_VERSION": "${localEnv:PHP_VERSION}"
 		},
 		"options": [
-			"--tag=${localEnv:IMAGE_NAME}:php${localEnv:PHP_VERSION}-trixie"
+			"--tag=${localEnv:IMAGE_NAME}:php${localEnv:PHP_VERSION}-trixie-latest",
+			"--tag=${localEnv:IMAGE_NAME}:php${localEnv:PHP_VERSION}-trixie-${localEnv:IMAGE_TIMESTAMP}"
 		]
 	},
 	"customizations": {
