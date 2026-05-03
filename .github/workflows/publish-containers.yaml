@@ -67,14 +67,13 @@ jobs:
         run: echo "image_timestamp=$(date -u +"%Y%m%dT%H%M%SZ")" | tee $GITHUB_OUTPUT
 
       # read image tag from subdirectory propery file if exists
-      #- uses: xom9ikk/dotenv@v2.3.0
-      #  with:
-      #    path: "src/${{ matrix.folder }}"
-      #    mode: ''
-      #    load-mode: 'skip'
-      #  env: 
-      #    PHP_VERSION: ${{ matrix.php_version }}
-      #    IMAGE_TIMESTAMP: ${{ steps.timestamp.outputs.image_timestamp }}
+      - uses: xom9ikk/dotenv@v2.3.0
+        with:
+          path: "src/${{ matrix.folder }}"
+          mode: ''
+          load-mode: 'skip'
+        env: 
+          PHP_VERSION: ${{ matrix.php_version }}
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -90,11 +89,11 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.IMAGE_NAME }}
-          imageTag: latest
-          cacheFrom: ${{ env.IMAGE_NAME }}:latest
+          imageTag: ${{ env.image_basetag }}
+          cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.image_basetag }}
           refFilterForPush: "refs/heads/main"
         env: 
-          PHP_VERSION: ${{ matrix.php_version }}
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
+          IMAGE_BASETAG: ${{ env.image_basetag }}
           IMAGE_TIMESTAMP: ${{ steps.timestamp.outputs.image_timestamp }}
           COMMIT_SHORT_SHA: ${{ steps.commit_short_sha.outputs.commit_short_sha }}
