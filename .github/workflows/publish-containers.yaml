@@ -54,6 +54,10 @@ jobs:
         id: lowercase-repo
         run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
 
+      - name: Create timestamp tag
+        id: timestamp
+        run: echo "image_timestamp=$(date -u +"%Y%m%dT%H%M%SZ")" >> $GITHUB_OUTPUT
+
       # read image tag from subdirectory propery file if exists
       - uses: xom9ikk/dotenv@v2.3.0
         with:
@@ -62,6 +66,7 @@ jobs:
           load-mode: 'skip'
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
+          IMAGE_TIMESTAMP: ${{ steps.timestamp.outputs.image_timestamp }}
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -83,4 +88,4 @@ jobs:
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
-          IMAGE_TIMESTAMP: ${{ env.IMAGE_TIMESTAMP }}
+          IMAGE_TIMESTAMP: ${{ steps.timestamp.outputs.image_timestamp }}
