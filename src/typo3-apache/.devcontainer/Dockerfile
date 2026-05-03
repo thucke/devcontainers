@@ -4,6 +4,8 @@ FROM php:${PHP_VERSION}-apache-trixie
 
 ARG DEVCONTAINER_SERVICE_ID
 ARG DEVCONTAINER_SERVICE_NAME
+ARG COMMIT_SHORT_SHA
+ARG IMAGE_TIMESTAMP
 
 ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
@@ -11,7 +13,12 @@ ENV APACHE_RUN_USER=${DEVCONTAINER_SERVICE_NAME}
 ENV APACHE_RUN_GROUP=${DEVCONTAINER_SERVICE_NAME}
 ENV TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
 
-LABEL dev.containers.servicetype="devcontainer"
+LABEL dev.containers.servicetype="devcontainer" \
+      dev.containers.serviceuser="${DEVCONTAINER_SERVICE_NAME}" \
+      dev.containers.serviceuid="${DEVCONTAINER_SERVICE_ID}" \
+      dev.containers.phpversion="${PHP_VERSION}" \
+      dev.containers.commit_short_sha="${COMMIT_SHORT_SHA}" \
+      dev.containers.build_date="${IMAGE_TIMESTAMP}"
 
 # should be set by devcontainer.json, but we set it here as well to be sure
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}

@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        package: [typo3-frankenphp, typo3-apache]
+        package: [typo3-frankenphp, typo3-apache, typo3-nginx]
     permissions:
       packages: write
     steps:
@@ -41,3 +41,5 @@ jobs:
         with:
           package: ${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
           delete-untagged: true
+          keep-n-tagged: 3
+          older-than: 5 weeks

@@ -19,28 +19,44 @@ on:
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  list-files:
+  preparation:
     runs-on: ubuntu-latest
     outputs:
       folders: ${{ steps.devcontainer-folders.outputs.folders }}
+      commit_short_sha: ${{ steps.commit_short_sha.outputs.commit_short_sha }}
+      repo: ${{ steps.lowercase-repo.outputs.repo }}
+      image_timestamp: ${{ steps.timestamp.outputs.image_timestamp }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
 
       - name: Get devcontainer folders
         id: devcontainer-folders
-        run: echo "folders=$(ls src | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
+        run: echo "folders=$(ls src | jq -R -s -c 'split("\n")[:-1]')" | tee $GITHUB_OUTPUT
+      - name: Set short git commit SHA
+        id: commit_short_sha
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "commit_short_sha=$calculatedSha" | tee $GITHUB_OUTPUT      
+      - name: Get lowercase repo name
+        id: lowercase-repo
+        run: echo "repo=${GITHUB_REPOSITORY@L}" | tee $GITHUB_OUTPUT
+
+      # TODO: this should be replaced by regular calver versioning, but for now we need a unique tag 
+      # to be able to push to ghcr without hitting "already exists" errors, because we want to keep the 
+      # latest tag up to date for users who don't specify a version.
+      - name: Create timestamp tag
+        id: timestamp
+        run: echo "image_timestamp=$(date -u +"%Y%m%dT%H%M%SZ")" | tee $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
-    needs: list-files
+    needs: preparation
     strategy:
       matrix:
-        folder: ${{ fromJson(needs.list-files.outputs.folders) }}
+        folder: ${{ fromJson(needs.preparation.outputs.folders) }}
         php_version: [8.5, 8.4, 8.3, 8.2]
     permissions:
       contents: read
@@ -52,10 +68,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Get lowercase repo name
-        id: lowercase-repo
-        run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
-
       # read image tag from subdirectory propery file if exists
       - uses: xom9ikk/dotenv@v2.3.0
         with:
@@ -69,19 +81,21 @@ jobs:
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Pre-build dev container image
         uses: devcontainers/ci@v0.3
         with:
           subFolder: src/${{ matrix.folder }}
-          imageName: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
-          imageTag: ${{ env.imagetag || 'latest' }}
-          cacheFrom: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}:${{ env.imagetag || 'latest' }}
+          imageName: ${{ env.IMAGE_NAME }}
+          imageTag: ${{ env.image_basetag }}
+          cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.image_basetag }}
           refFilterForPush: "refs/heads/main"
         env: 
-          PHP_VERSION: ${{ matrix.php_version }}
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
+          IMAGE_BASETAG: ${{ env.image_basetag }}
+          IMAGE_TIMESTAMP: ${{ needs.preparation.outputs.image_timestamp }}
+          COMMIT_SHORT_SHA: ${{ needs.preparation.outputs.commit_short_sha }}
