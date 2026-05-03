@@ -31,7 +31,7 @@ jobs:
 
       - name: Get devcontainer folders
         id: devcontainer-folders
-        run: echo "folders=$(ls src | jq -R -s -c 'split("\n")[:-1]')" >> $GITHUB_OUTPUT
+        run: echo "folders=$(ls src | jq -R -s -c 'split("\n")[:-1]')" | tee $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
@@ -50,23 +50,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+      - name: Set short git commit SHA
+        id: commit_short_sha
+        run: |
+          calculatedSha=$(git rev-parse --short ${{ github.sha }})
+          echo "commit_short_sha=$calculatedSha" | tee $GITHUB_OUTPUT      
       - name: Get lowercase repo name
         id: lowercase-repo
-        run: echo "repo=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+        run: echo "repo=${GITHUB_REPOSITORY@L}" | tee $GITHUB_OUTPUT
 
+      # TODO: this should be replaced by regular calver versioning, but for now we need a unique tag 
+      # to be able to push to ghcr without hitting "already exists" errors, because we want to keep the 
+      # latest tag up to date for users who don't specify a version.
       - name: Create timestamp tag
         id: timestamp
-        run: echo "image_timestamp=$(date -u +"%Y%m%dT%H%M%SZ")" >> $GITHUB_OUTPUT
+        run: echo "image_timestamp=$(date -u +"%Y%m%dT%H%M%SZ")" | tee $GITHUB_OUTPUT
 
       # read image tag from subdirectory propery file if exists
-      - uses: xom9ikk/dotenv@v2.3.0
-        with:
-          path: "src/${{ matrix.folder }}"
-          mode: ''
-          load-mode: 'skip'
-        env: 
-          PHP_VERSION: ${{ matrix.php_version }}
-          IMAGE_TIMESTAMP: ${{ steps.timestamp.outputs.image_timestamp }}
+      #- uses: xom9ikk/dotenv@v2.3.0
+      #  with:
+      #    path: "src/${{ matrix.folder }}"
+      #    mode: ''
+      #    load-mode: 'skip'
+      #  env: 
+      #    PHP_VERSION: ${{ matrix.php_version }}
+      #    IMAGE_TIMESTAMP: ${{ steps.timestamp.outputs.image_timestamp }}
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
@@ -82,10 +90,11 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.IMAGE_NAME }}
-          imageTag: ${{ env.imagetag || 'latest' }}
-          cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.imagetag || 'latest' }}
+          imageTag: latest
+          cacheFrom: ${{ env.IMAGE_NAME }}:latest
           refFilterForPush: "refs/heads/main"
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.folder }}
           IMAGE_TIMESTAMP: ${{ steps.timestamp.outputs.image_timestamp }}
+          COMMIT_SHORT_SHA: ${{ steps.commit_short_sha.outputs.commit_short_sha }}
