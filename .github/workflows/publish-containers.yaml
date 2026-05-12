@@ -69,6 +69,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
       # read image tag from subdirectory propery file if exists
+      - name: Install Skopeo
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y skopeo
       - uses: xom9ikk/dotenv@v2.3.0
         with:
           path: "src/${{ matrix.folder }}"
@@ -86,16 +90,27 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set next image tag
+        id: set-next-image-tag
+        run: |
+          last_imagecalvertag=$(skopeo list-tags --no-creds docker://ghcr.io/${IMAGE_NAME} | \
+            jq -r --arg image_basetag "$image_basetag" '.Tags | sort_by(.) | [ .[] | select(.|startswith($image_basetag))]|[last][0]')
+          last_imagecalver=${last_imagecalvertag##*-}
+          next_imagecalver=$((last_imagecalver + 1))
+          echo "next_imagecalvertag=${image_basetag}-${next_imagecalver}" | tee $GITHUB_OUTPUT
+        env: 
+          IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
+          image_basetag: ${{ env.image_basetag }} # set in .env file in each subdirectory
       - name: Pre-build dev container image
         uses: devcontainers/ci@v0.3
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.IMAGE_NAME }}
-          imageTag: ${{ env.image_basetag }}
+          imageTag: ${{ env.image_basetag }}, ${{ steps.set-next-image-tag.outputs.next_imagecalvertag }}
           cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.image_basetag }}
           refFilterForPush: "refs/heads/main"
         env: 
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
-          IMAGE_BASETAG: ${{ env.image_basetag }}
           IMAGE_TIMESTAMP: ${{ needs.preparation.outputs.image_timestamp }}
           COMMIT_SHORT_SHA: ${{ needs.preparation.outputs.commit_short_sha }}
+          image_basetag: ${{ env.image_basetag }} # set in .env file in each subdirectory
