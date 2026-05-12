@@ -1,0 +1,9 @@
+{
+    "Repository": "ghcr.io/thucke/devcontainers/typo3-frankenphp",
+    "Tags": [
+        "php8.3-trixie",
+        "php8.2-trixie",
+        "php8.4-trixie",
+        "php8.5-trixie"
+    ]
+}
