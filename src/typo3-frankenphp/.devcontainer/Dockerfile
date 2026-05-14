@@ -6,6 +6,7 @@ ARG DEVCONTAINER_SERVICE_ID
 ARG DEVCONTAINER_SERVICE_NAME
 ARG COMMIT_SHORT_SHA
 ARG IMAGE_TIMESTAMP
+ARG IMAGEVERSION
 
 ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
@@ -16,7 +17,8 @@ LABEL dev.containers.servicetype="devcontainer" \
       dev.containers.serviceuid="${DEVCONTAINER_SERVICE_ID}" \
       dev.containers.phpversion="${PHP_VERSION}" \
       dev.containers.commit_short_sha="${COMMIT_SHORT_SHA}" \
-      dev.containers.build_date="${IMAGE_TIMESTAMP}"
+      dev.containers.build_date="${IMAGE_TIMESTAMP}" \
+      dev.containers.imageversion="${IMAGEVERSION}"
 
 # should be set by devcontainer.json, but we set it here as well to be sure
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}

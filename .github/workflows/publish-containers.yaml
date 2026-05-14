@@ -93,10 +93,18 @@ jobs:
       - name: Set next image tag
         id: set-next-image-tag
         run: |
+          current_calver_major_minor=$(date "+%Y.%m")
           last_imagecalvertag=$(skopeo list-tags --no-creds docker://ghcr.io/${IMAGE_NAME} | \
             jq -r --arg image_basetag "$image_basetag" '.Tags | sort_by(.) | [ .[] | select(.|startswith($image_basetag))]|[last][0]')
           last_imagecalver=${last_imagecalvertag##*-}
-          next_imagecalver=$((last_imagecalver + 1)) || tee $GITHUB_ENV
+          if [[ ${last_imagecalver} == "${current_calver_major_minor}"* ]]; then
+            current_patch_number=${last_imagecalver#${current_calver_major_minor}.}
+            next_patch_number=$((current_patch_number + 1))
+            export next_calver="${current_calver_major_minor}.${next_patch_number}"
+          else
+            export next_calver="${current_calver_major_minor}.0" 
+          fi
+          echo "next_calver=${next_calver}" | tee $GITHUB_ENV
         env: 
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
           image_basetag: ${{ env.image_basetag }} # set in .env file in each subdirectory
@@ -112,5 +120,5 @@ jobs:
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
           IMAGE_BASETAG: ${{ env.image_basetag }}
           IMAGE_TIMESTAMP: ${{ needs.preparation.outputs.image_timestamp }}
-          NEXT_IMAGECALVER: ${{ env.next_imagecalver }}
+          NEXT_CALVER: ${{ env.next_calver }}
           COMMIT_SHORT_SHA: ${{ needs.preparation.outputs.commit_short_sha }}

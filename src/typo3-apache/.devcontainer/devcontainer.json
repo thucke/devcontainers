@@ -10,12 +10,12 @@
 			"DEVCONTAINER_SERVICE_ID": "10000",
 			"PHP_VERSION": "${localEnv:PHP_VERSION}",
 			"COMMIT_SHORT_SHA": "${localEnv:COMMIT_SHORT_SHA}",
-			"IMAGE_TIMESTAMP": "${localEnv:IMAGE_TIMESTAMP}"
+			"IMAGE_TIMESTAMP": "${localEnv:IMAGE_TIMESTAMP}",
+			"IMAGEVERSION": "${localEnv:NEXT_CALVER}"
 		},
 		"options": [
 			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}",
-			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}-${localEnv:IMAGE_TIMESTAMP}",
-			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}-${localEnv:NEXT_IMAGECALVER}"
+			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}-${localEnv:NEXT_CALVER}"
 		]
 	},
 	"customizations": {
