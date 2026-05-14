@@ -36,10 +36,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Maintain tagged images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          package: ${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
+          delete-untagged: false
+          keep-n-tagged: 16
+          older-than: 5 weeks
       - name: Delete untagged images
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           package: ${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
           delete-untagged: true
-          keep-n-tagged: 16
-          older-than: 5 weeks
+          keep-n-untagged: 0
