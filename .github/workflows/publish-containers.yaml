@@ -113,4 +113,4 @@ jobs:
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
           IMAGE_TIMESTAMP: ${{ needs.preparation.outputs.image_timestamp }}
           COMMIT_SHORT_SHA: ${{ needs.preparation.outputs.commit_short_sha }}
-          image_basetag: ${{ env.image_basetag }} # set in .env file in each subdirectory
+          IMAGE_BASETAG: ${{ env.image_basetag }}
