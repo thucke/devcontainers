@@ -105,7 +105,8 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.IMAGE_NAME }}
-          imageTag: ${{ env.image_basetag }}, ${{ env.image_basetag }}-${{ steps.set-next-image-tag.outputs.next_imagecalver }}
+          imageTag: ${{ env.image_basetag }}
+          #imageTag: ${{ env.image_basetag }}, ${{ env.image_basetag }}-${{ steps.set-next-image-tag.outputs.next_imagecalver }}
           cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.image_basetag }}
           refFilterForPush: "refs/heads/main"
         env: 
