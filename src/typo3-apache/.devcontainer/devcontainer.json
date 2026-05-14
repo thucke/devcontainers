@@ -14,7 +14,8 @@
 		},
 		"options": [
 			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}",
-			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}-${localEnv:IMAGE_TIMESTAMP}"
+			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}-${localEnv:IMAGE_TIMESTAMP}",
+			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}-${localEnv:NEXT_IMAGECALVER}"
 		]
 	},
 	"customizations": {

@@ -96,7 +96,7 @@ jobs:
           last_imagecalvertag=$(skopeo list-tags --no-creds docker://ghcr.io/${IMAGE_NAME} | \
             jq -r --arg image_basetag "$image_basetag" '.Tags | sort_by(.) | [ .[] | select(.|startswith($image_basetag))]|[last][0]')
           last_imagecalver=${last_imagecalvertag##*-}
-          next_imagecalver=$((last_imagecalver + 1))
+          next_imagecalver=$((last_imagecalver + 1)) || tee $GITHUB_ENV
         env: 
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
           image_basetag: ${{ env.image_basetag }} # set in .env file in each subdirectory
@@ -105,10 +105,10 @@ jobs:
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.IMAGE_NAME }}
-          imageTag: ${{ env.image_basetag }}-${{ steps.set-next-image-tag.outputs.next_imagecalver }}
           cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.image_basetag }}
           refFilterForPush: "refs/heads/main"
         env: 
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
           IMAGE_TIMESTAMP: ${{ needs.preparation.outputs.image_timestamp }}
+          NEXT_IMAGECALVER: ${{ env.next_imagecalver }}
           COMMIT_SHORT_SHA: ${{ needs.preparation.outputs.commit_short_sha }}
