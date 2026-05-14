@@ -90,8 +90,8 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Set next image tag
-        id: set-next-image-tag
+      - name: Calculate next calver version
+        id: calculate-next-calver
         run: |
           current_calver_major_minor=$(date "+%Y.%m")
           last_imagecalvertag=$(skopeo list-tags --no-creds docker://ghcr.io/${IMAGE_NAME} | \
