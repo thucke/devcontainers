@@ -15,31 +15,49 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  preparation:
+    runs-on: ubuntu-latest
+    outputs:
+      folders: ${{ steps.devcontainer-folders.outputs.folders }}
+      package: ${{ steps.lowercase-package.outputs.package }}
+      dry_run: ${{ steps.dry_run.outputs.dry_run }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Get devcontainer folders
+        id: devcontainer-folders
+        run: echo "folders=$(ls src | jq -R -s -c 'split("\n")[:-1]')" | tee $GITHUB_OUTPUT
+      - name: Get lowercase package name
+        id: lowercase-package
+        run: echo "package=$(echo ${GITHUB_REPOSITORY@L}|cut -d/ -f2)" | tee $GITHUB_OUTPUT
+      - name: Set dry run
+        id: dry_run
+        run: echo "dry_run=${{ github.event_name != 'pull_request' }}" | tee $GITHUB_OUTPUT
   cleanup:
     runs-on: ubuntu-latest
+    needs: preparation
     strategy:
       matrix:
-        package: [typo3-frankenphp, typo3-apache, typo3-nginx]
+        folder: ${{ fromJson(needs.preparation.outputs.folders) }}
     permissions:
       packages: write
     steps:
-      - name: Get lowercase repo name
-        id: lowercase-repo
-        run: echo "repo=$(echo ${GITHUB_REPOSITORY@L}|cut -d/ -f2)" >> $GITHUB_OUTPUT
-
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Delete untagged images
+      - name: Maintain tagged images
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
-          package: ${{ steps.lowercase-repo.outputs.repo }}/${{ matrix.package }}
+          package: ${{ needs.preparation.outputs.package }}/${{ matrix.folder }}
+          keep-n-tagged: 12
+          exclude-tags: php-8.?-trixie
           delete-untagged: true
-          keep-n-tagged: 3
-          older-than: 5 weeks
+          keep-n-untagged: 0
+          dry-run: ${{ needs.preparation.outputs.dry_run }}
