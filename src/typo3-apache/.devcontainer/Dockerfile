@@ -1,7 +1,7 @@
 ARG IMAGE_BASE_NAME
 ARG IMAGE_BASE_DIGEST
 
-FROM ${IMAGE_BASE_NAME}:${IMAGE_BASE_DIGEST}
+FROM ${IMAGE_BASE_NAME}@${IMAGE_BASE_DIGEST}
 
 ARG DEVCONTAINER_SERVICE_ID
 ARG DEVCONTAINER_SERVICE_NAME
@@ -9,6 +9,7 @@ ARG COMMIT_SHA
 ARG IMAGE_TIMESTAMP
 ARG IMAGE_VERSION
 ARG IMAGE_BASE_NAME
+ARG IMAGE_BASE_TAG
 ARG MATRIX_FOLDER
 ARG PHP_VERSION
 
@@ -32,7 +33,7 @@ LABEL dev.containers.servicetype="devcontainer" \
       org.opencontainers.image.vendor="Thomas Hucke" \
       org.opencontainers.image.version="${IMAGE_VERSION}" \
       org.opencontainers.image.base.digest="${IMAGE_BASE_DIGEST}" \
-      org.opencontainers.image.base.name="${IMAGE_BASE_NAME}"
+      org.opencontainers.image.base.name="${IMAGE_BASE_NAME}:${IMAGE_BASE_TAG}"
 
 # should be set by devcontainer.json, but we set it here as well to be sure
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}
