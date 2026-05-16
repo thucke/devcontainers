@@ -1,12 +1,16 @@
-ARG PHP_VERSION
+ARG IMAGE_BASE_NAME
+ARG IMAGE_BASE_DIGEST
 
-FROM php:${PHP_VERSION}-apache-trixie
+FROM ${IMAGE_BASE_NAME}:${IMAGE_BASE_DIGEST}
 
 ARG DEVCONTAINER_SERVICE_ID
 ARG DEVCONTAINER_SERVICE_NAME
-ARG COMMIT_SHORT_SHA
+ARG COMMIT_SHA
 ARG IMAGE_TIMESTAMP
-ARG IMAGEVERSION
+ARG IMAGE_VERSION
+ARG IMAGE_BASE_NAME
+ARG MATRIX_FOLDER
+ARG PHP_VERSION
 
 ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
@@ -18,9 +22,17 @@ LABEL dev.containers.servicetype="devcontainer" \
       dev.containers.serviceuser="${DEVCONTAINER_SERVICE_NAME}" \
       dev.containers.serviceuid="${DEVCONTAINER_SERVICE_ID}" \
       dev.containers.phpversion="${PHP_VERSION}" \
-      dev.containers.commit_short_sha="${COMMIT_SHORT_SHA}" \
-      dev.containers.build_date="${IMAGE_TIMESTAMP}" \
-      dev.containers.imageversion="${IMAGEVERSION}"
+      org.opencontainers.image.created="${IMAGE_TIMESTAMP}" \
+      org.opencontainers.image.description="A development container for TYPO3 with Apache and PHP ${PHP_VERSION} based on the official PHP Apache image" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.revision="${COMMIT_SHA}" \
+      org.opencontainers.image.source="https://github.com/thucke/devcontainers/tree/main/src/${MATRIX_FOLDER}/.devcontainer" \
+      org.opencontainers.image.title="TYPO3 Apache/PHP-PFM Devcontainer" \
+      org.opencontainers.image.url="https://github.com/thucke/devcontainers/pkgs/container/devcontainers%2F${MATRIX_FOLDER}" \
+      org.opencontainers.image.vendor="Thomas Hucke" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.base.digest="${IMAGE_BASE_DIGEST}" \
+      org.opencontainers.image.base.name="${IMAGE_BASE_NAME}"
 
 # should be set by devcontainer.json, but we set it here as well to be sure
 ENV WORKSPACE_ROOT=${WORKSPACE_ROOT:-/workspaces}
