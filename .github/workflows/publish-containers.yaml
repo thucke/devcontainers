@@ -97,8 +97,8 @@ jobs:
         id: calculate-next-calver
         run: |
           current_calver_major_minor=$(date "+%Y.%m")
-          last_imagecalvertag=$(skopeo list-tags --no-creds docker://ghcr.io/${IMAGE_NAME} | \
-            jq -r --arg IMAGE_BASETAG "$IMAGE_BASETAG" '.Tags | sort_by(.) | [ .[] | select(.|startswith($IMAGE_BASETAG))]|[last][0]')
+          last_imagecalvertag=$(skopeo list-tags --no-creds docker://ghcr.io/${TARGET_IMAGE_NAME} | \
+            jq -r --arg TARGET_IMAGE_BASETAG "$TARGET_IMAGE_BASETAG" '.Tags | sort_by(.) | [ .[] | select(.|startswith($TARGET_IMAGE_BASETAG))]|[last][0]')
           last_imagecalver=${last_imagecalvertag##*-}
           if [[ ${last_imagecalver} == "${current_calver_major_minor}"* ]]; then
             current_patch_number=${last_imagecalver#${current_calver_major_minor}.}
@@ -109,19 +109,21 @@ jobs:
           fi
           echo "NEXT_CALVER=${next_calver}" | tee $GITHUB_ENV
         env: 
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
-          IMAGE_BASETAG: ${{ env.IMAGE_BASETAG }} # set in .env file in each subdirectory
+          TARGET_IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
+          TARGET_IMAGE_BASETAG: ${{ env.TARGET_IMAGE_BASETAG }} # set in .env file in each subdirectory
       - name: Pre-build dev container image
         uses: devcontainers/ci@v0.3
         with:
           subFolder: src/${{ matrix.folder }}
-          imageName: ${{ env.IMAGE_NAME }}
-          imageTag: ${{ env.IMAGE_BASETAG }}, ${{ env.IMAGE_BASETAG }}-${{ env.NEXT_CALVER }}
-          cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_BASETAG }}
+          imageName: ${{ env.TARGET_IMAGE_NAME }}
+          imageTag: ${{ env.TARGET_IMAGE_BASETAG }}, ${{ env.TARGET_IMAGE_BASETAG }}-${{ env.NEXT_CALVER }}
+          cacheFrom: ${{ env.TARGET_IMAGE_NAME }}:${{ env.TARGET_IMAGE_BASETAG }}
           refFilterForPush: "refs/heads/main"
         env: 
-          IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
-          IMAGE_BASETAG: ${{ env.IMAGE_BASETAG }}
+          TARGET_IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
+          TARGET_IMAGE_BASETAG: ${{ env.TARGET_IMAGE_BASETAG }}
+          IMAGE_BASE_NAME: ${{ env.IMAGE_BASE_NAME }}
+          IMAGE_BASE_TAG: ${{ env.IMAGE_BASE_TAG }}
           IMAGE_BASE_DIGEST: ${{ env.IMAGE_BASE_DIGEST }}
           IMAGE_TIMESTAMP: ${{ needs.preparation.outputs.image_timestamp }}
           NEXT_CALVER: ${{ env.NEXT_CALVER }}

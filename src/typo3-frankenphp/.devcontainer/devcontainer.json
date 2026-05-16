@@ -18,8 +18,8 @@
 			"PHP_VERSION": "${localEnv:PHP_VERSION}"
 		},
 		"options": [
-			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}",
-			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}-${localEnv:NEXT_CALVER}"
+			"--tag=${localEnv:TARGET_IMAGE_NAME}:${localEnv:TARGET_IMAGE_BASETAG}",
+			"--tag=${localEnv:TARGET_IMAGE_NAME}:${localEnv:TARGET_IMAGE_BASETAG}-${localEnv:NEXT_CALVER}"
 		]
 	},
 	"customizations": {
