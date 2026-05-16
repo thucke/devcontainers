@@ -25,7 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       folders: ${{ steps.devcontainer-folders.outputs.folders }}
-      commit_short_sha: ${{ steps.commit_short_sha.outputs.commit_short_sha }}
       repo: ${{ steps.lowercase-repo.outputs.repo }}
       image_timestamp: ${{ steps.timestamp.outputs.image_timestamp }}
     steps:
@@ -35,11 +34,6 @@ jobs:
       - name: Get devcontainer folders
         id: devcontainer-folders
         run: echo "folders=$(ls src | jq -R -s -c 'split("\n")[:-1]')" | tee $GITHUB_OUTPUT
-      - name: Set short git commit SHA
-        id: commit_short_sha
-        run: |
-          calculatedSha=$(git rev-parse --short ${{ github.sha }})
-          echo "commit_short_sha=$calculatedSha" | tee $GITHUB_OUTPUT      
       - name: Get lowercase repo name
         id: lowercase-repo
         run: echo "repo=${GITHUB_REPOSITORY@L}" | tee $GITHUB_OUTPUT
@@ -49,7 +43,7 @@ jobs:
       # latest tag up to date for users who don't specify a version.
       - name: Create timestamp tag
         id: timestamp
-        run: echo "image_timestamp=$(date -u +"%Y%m%dT%H%M%SZ")" | tee $GITHUB_OUTPUT
+        run: echo "image_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" | tee $GITHUB_OUTPUT
 
   build:
     runs-on: ubuntu-latest
@@ -73,14 +67,23 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y skopeo
-      - uses: xom9ikk/dotenv@v2.3.0
+      - uses: xom9ikk/dotenv@v2.4.0
         with:
           path: "src/${{ matrix.folder }}"
           mode: ''
           load-mode: 'skip'
         env: 
           PHP_VERSION: ${{ matrix.php_version }}
-
+      - name: Get image base digest
+        id: get-image-base-digest
+        run: |
+          if [[ -n "${IMAGE_BASE_TAG}" ]]; then
+            image_base_reference="${IMAGE_BASE_NAME}:${IMAGE_BASE_TAG}"
+          else
+            image_base_reference="${IMAGE_BASE_NAME}"
+          fi
+          image_base_digest=$(skopeo inspect --no-creds docker://${image_base_reference} | jq -r .Digest)
+          echo "IMAGE_BASE_DIGEST=${image_base_digest}" | tee $GITHUB_ENV
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
@@ -95,30 +98,32 @@ jobs:
         run: |
           current_calver_major_minor=$(date "+%Y.%m")
           last_imagecalvertag=$(skopeo list-tags --no-creds docker://ghcr.io/${IMAGE_NAME} | \
-            jq -r --arg image_basetag "$image_basetag" '.Tags | sort_by(.) | [ .[] | select(.|startswith($image_basetag))]|[last][0]')
+            jq -r --arg IMAGE_BASETAG "$IMAGE_BASETAG" '.Tags | sort_by(.) | [ .[] | select(.|startswith($IMAGE_BASETAG))]|[last][0]')
           last_imagecalver=${last_imagecalvertag##*-}
           if [[ ${last_imagecalver} == "${current_calver_major_minor}"* ]]; then
             current_patch_number=${last_imagecalver#${current_calver_major_minor}.}
             next_patch_number=$((current_patch_number + 1))
-            export next_calver="${current_calver_major_minor}.${next_patch_number}"
+            next_calver="${current_calver_major_minor}.${next_patch_number}"
           else
-            export next_calver="${current_calver_major_minor}.0" 
+            next_calver="${current_calver_major_minor}.0" 
           fi
-          echo "next_calver=${next_calver}" | tee $GITHUB_ENV
+          echo "NEXT_CALVER=${next_calver}" | tee $GITHUB_ENV
         env: 
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
-          image_basetag: ${{ env.image_basetag }} # set in .env file in each subdirectory
+          IMAGE_BASETAG: ${{ env.IMAGE_BASETAG }} # set in .env file in each subdirectory
       - name: Pre-build dev container image
         uses: devcontainers/ci@v0.3
         with:
           subFolder: src/${{ matrix.folder }}
           imageName: ${{ env.IMAGE_NAME }}
-          imageTag: ${{ env.image_basetag }}, ${{ env.image_basetag }}-${{ env.next_calver }}
-          cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.image_basetag }}
+          imageTag: ${{ env.IMAGE_BASETAG }}, ${{ env.IMAGE_BASETAG }}-${{ env.NEXT_CALVER }}
+          cacheFrom: ${{ env.IMAGE_NAME }}:${{ env.IMAGE_BASETAG }}
           refFilterForPush: "refs/heads/main"
         env: 
           IMAGE_NAME: ${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}
-          IMAGE_BASETAG: ${{ env.image_basetag }}
+          IMAGE_BASETAG: ${{ env.IMAGE_BASETAG }}
+          IMAGE_BASE_DIGEST: ${{ env.IMAGE_BASE_DIGEST }}
           IMAGE_TIMESTAMP: ${{ needs.preparation.outputs.image_timestamp }}
-          NEXT_CALVER: ${{ env.next_calver }}
-          COMMIT_SHORT_SHA: ${{ needs.preparation.outputs.commit_short_sha }}
+          NEXT_CALVER: ${{ env.NEXT_CALVER }}
+          COMMIT_SHA: ${{ github.sha }}
+          MATRIX_FOLDER: ${{ matrix.folder }}

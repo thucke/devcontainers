@@ -6,12 +6,16 @@
 		"context": ".",
 		"dockerfile": "Dockerfile",
 		"args": {
+			"COMMIT_SHA": "${localEnv:COMMIT_SHA}",
 			"DEVCONTAINER_SERVICE_NAME": "typo3dev",
 			"DEVCONTAINER_SERVICE_ID": "10000",
-			"PHP_VERSION": "${localEnv:PHP_VERSION}",
-			"COMMIT_SHORT_SHA": "${localEnv:COMMIT_SHORT_SHA}",
+			"IMAGE_BASE_DIGEST": "${localEnv:IMAGE_BASE_DIGEST}",
+			"IMAGE_BASE_NAME": "${localEnv:IMAGE_BASE_NAME}",
+			"IMAGE_BASE_TAG": "${localEnv:IMAGE_BASE_TAG}",
 			"IMAGE_TIMESTAMP": "${localEnv:IMAGE_TIMESTAMP}",
-			"IMAGEVERSION": "${localEnv:NEXT_CALVER}"
+			"IMAGE_VERSION": "${localEnv:NEXT_CALVER}",
+			"MATRIX_FOLDER": "${localEnv:MATRIX_FOLDER}",
+			"PHP_VERSION": "${localEnv:PHP_VERSION}"
 		},
 		"options": [
 			"--tag=${localEnv:IMAGE_NAME}:${localEnv:IMAGE_BASETAG}",
