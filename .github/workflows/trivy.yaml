@@ -95,6 +95,7 @@ jobs:
           TRIVY_USERNAME: ${{ github.actor }}
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           INPUT_LIMIT_SEVERITIES_FOR_SARIF: true
+          TARGET_IMAGE_BASETAG: ${{ env.TARGET_IMAGE_BASETAG }}
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
         if: always()

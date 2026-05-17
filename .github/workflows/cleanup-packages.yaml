@@ -7,6 +7,8 @@ name: Cleanup packages
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '22 1 * * 3'
 
 env:
   # Use docker.io for Docker Hub if empty
