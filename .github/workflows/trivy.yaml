@@ -34,20 +34,45 @@ jobs:
       - name: Get lowercase repo name
         id: lowercase-repo
         run: echo "repo=${GITHUB_REPOSITORY@L}" | tee $GITHUB_OUTPUT
-  build:
-    permissions:
-      #contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    name: Build
+
+  runtime-versions:
+    name: Get runtime versions
     runs-on: ubuntu-latest
     needs: preparation
     strategy:
       matrix:
         folder: ${{ fromJson(needs.preparation.outputs.folders) }}
-        php_version: [8.5, 8.4, 8.3, 8.2]
+    outputs:
+      runtime_versions: ${{ steps.runtime-versions.outputs.runtime_versions }}
     steps:
-      - name: Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Read runtime name from config.json
+        id: runtime-name
+        run: |
+          runtime_name=$(jq -r '.ci.runtime_name' src/${{ matrix.folder }}/config.json)
+          echo "RUNTIME_NAME=${runtime_name}" | tee $GITHUB_ENV
+      - name: Load ${{ env.RUNTIME_NAME }} runtime versions to process from config.json
+        id: runtime-versions
+        run: |
+          runtime_versions=$(jq -c --arg runtime_name "${RUNTIME_NAME}_versions" '.ci.[$runtime_name]' src/${{ matrix.folder }}/config.json)
+          echo "runtime_versions=$runtime_versions" | tee $GITHUB_OUTPUT
+        env:
+          RUNTIME_NAME: ${{ env.RUNTIME_NAME }}
+  scan:
+    permissions:
+      #contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+    name: Scan images
+    runs-on: ubuntu-latest
+    needs: [preparation, runtime-versions]
+    strategy:
+      matrix:
+        folder: ${{ fromJson(needs.preparation.outputs.folders) }}
+        runtime_version: ${{ fromJson(needs.runtime-versions.outputs.runtime_versions) }}
+    steps:
+      - name: Checkout repository
         uses: actions/checkout@v6
 
       - uses: xom9ikk/dotenv@v2.4.0
@@ -56,26 +81,23 @@ jobs:
           mode: ''
           load-mode: 'skip'
         env: 
-          PHP_VERSION: ${{ matrix.php_version }}
+          RUNTIME_VERSION: ${{ matrix.runtime_version }}
 
-      - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v4
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: '${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}:${{ env.TARGET_IMAGE_BASETAG }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-
+          ignore-unfixed: true
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_LIMIT_SEVERITIES_FOR_SARIF: true
+          TARGET_IMAGE_BASETAG: ${{ env.TARGET_IMAGE_BASETAG }}
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
         with:
           sarif_file: 'trivy-results.sarif'
