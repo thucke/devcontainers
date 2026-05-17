@@ -24,6 +24,7 @@ jobs:
     outputs:
       folders: ${{ steps.devcontainer-folders.outputs.folders }}
       repo: ${{ steps.lowercase-repo.outputs.repo }}
+      runtime_name: ${{ steps.runtime-name.outputs.runtime_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -34,34 +35,41 @@ jobs:
       - name: Get lowercase repo name
         id: lowercase-repo
         run: echo "repo=${GITHUB_REPOSITORY@L}" | tee $GITHUB_OUTPUT
-  php-versions:
+      - name: Read runtime name from config.json
+        id: runtime-name
+        run: |
+          runtime_name=$(jq -c '.ci.runtime_name' src/${{ matrix.folder }}/config.json)
+          echo "runtime_name=$runtime_name" | tee $GITHUB_OUTPUT
+
+  runtime-versions:
+    name: Get runtime ${{ needs.preparation.outputs.runtime_name }} versions
     runs-on: ubuntu-latest
     needs: preparation
     strategy:
       matrix:
         folder: ${{ fromJson(needs.preparation.outputs.folders) }}
     outputs:
-      php_versions: ${{ steps.php-versions.outputs.php_versions }}
+      runtime_versions: ${{ steps.runtime-versions.outputs.runtime_versions }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Load php versions to process from config.json
-        id: php-versions
+      - name: Load runtime versions to process from config.json
+        id: runtime-versions
         run: |
-          php_versions=$(jq -c '.ci.php_versions' src/${{ matrix.folder }}/config.json)
-          echo "php_versions=$php_versions" | tee $GITHUB_OUTPUT
+          runtime_versions=$(jq -c --arg runtime_name "${{ needs.preparation.outputs.runtime_name }}" '.ci.${runtime_name}_versions' src/${{ matrix.folder }}/config.json)
+          echo "runtime_versions=$runtime_versions" | tee $GITHUB_OUTPUT
   scan:
     permissions:
       #contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
-    name: Build
+    name: Scan images
     runs-on: ubuntu-latest
-    needs: [preparation, php-versions]
+    needs: [preparation, runtime-versions]
     strategy:
       matrix:
         folder: ${{ fromJson(needs.preparation.outputs.folders) }}
-        php_version: ${{ fromJson(needs.php-versions.outputs.php_versions) }}
+        runtime_version: ${{ fromJson(needs.runtime-versions.outputs.runtime_versions) }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -72,7 +80,7 @@ jobs:
           mode: ''
           load-mode: 'skip'
         env: 
-          PHP_VERSION: ${{ matrix.php_version }}
+          RUNTIME_VERSION: ${{ matrix.runtime_version }}
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.36.0

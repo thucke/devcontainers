@@ -1,5 +1,6 @@
 {
   "ci": {
+    "runtime_name": "php",
     "php_versions": [
       "8.2",
       "8.3",
