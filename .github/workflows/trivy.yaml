@@ -43,6 +43,8 @@ jobs:
     outputs:
       php_versions: ${{ steps.php-versions.outputs.php_versions }}
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
       - name: Load php versions to process from config.json
         id: php-versions
         run: |
@@ -61,7 +63,7 @@ jobs:
         folder: ${{ fromJson(needs.preparation.outputs.folders) }}
         php_version: ${{ fromJson(needs.php-versions.outputs.php_versions) }}
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v6
 
       - uses: xom9ikk/dotenv@v2.4.0
