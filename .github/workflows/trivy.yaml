@@ -50,7 +50,7 @@ jobs:
       - name: Read runtime name from config.json
         id: runtime-name
         run: |
-          runtime_name=$(jq -c '.ci.runtime_name' src/${{ matrix.folder }}/config.json)
+          runtime_name=$(jq -r '.ci.runtime_name' src/${{ matrix.folder }}/config.json)
           echo "RUNTIME_NAME=${runtime_name}" | tee $GITHUB_ENV
       - name: Load ${{ env.RUNTIME_NAME }} runtime versions to process from config.json
         id: runtime-versions
