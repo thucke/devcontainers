@@ -67,7 +67,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y skopeo
-      - uses: xom9ikk/dotenv@v2.4.0
+      - name: Load environment variables from .env file
+        uses: xom9ikk/dotenv@v2.4.0
         with:
           path: "src/${{ matrix.folder }}"
           mode: ''
