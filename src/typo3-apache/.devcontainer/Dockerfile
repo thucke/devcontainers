@@ -19,7 +19,8 @@ ENV APACHE_RUN_USER=${DEVCONTAINER_SERVICE_NAME}
 ENV APACHE_RUN_GROUP=${DEVCONTAINER_SERVICE_NAME}
 ENV TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
 
-LABEL dev.containers.servicetype="devcontainer" \
+LABEL dev.containers.phpversion="${PHP_VERSION}" \
+      dev.containers.servicetype="devcontainer" \
       dev.containers.serviceuser="${DEVCONTAINER_SERVICE_NAME}" \
       dev.containers.serviceuid="${DEVCONTAINER_SERVICE_ID}" \
       org.opencontainers.image.created="${IMAGE_TIMESTAMP}" \
