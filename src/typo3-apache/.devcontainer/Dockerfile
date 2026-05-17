@@ -1,12 +1,10 @@
 ARG IMAGE_BASE_NAME="php"
-ARG IMAGE_BASE_DIGEST="sha256:1"
+ARG IMAGE_BASE_TAG="8.4"
 
-FROM ${IMAGE_BASE_NAME}@${IMAGE_BASE_DIGEST}
+FROM ${IMAGE_BASE_NAME}:${IMAGE_BASE_TAG}
 
-ARG IMAGE_BASE_NAME
 ARG IMAGE_BASE_DIGEST
 ARG IMAGE_BASE_NAME_LABEL
-ARG IMAGE_BASE_DIGEST_LABEL
 ARG DEVCONTAINER_SERVICE_ID
 ARG DEVCONTAINER_SERVICE_NAME
 ARG COMMIT_SHA
@@ -24,7 +22,6 @@ ENV TYPO3_INSTALL_WEB_SERVER_CONFIG=apache
 LABEL dev.containers.servicetype="devcontainer" \
       dev.containers.serviceuser="${DEVCONTAINER_SERVICE_NAME}" \
       dev.containers.serviceuid="${DEVCONTAINER_SERVICE_ID}" \
-      dev.containers.phpversion="${PHP_VERSION}" \
       org.opencontainers.image.created="${IMAGE_TIMESTAMP}" \
       org.opencontainers.image.description="A development container for TYPO3 with Apache and PHP ${PHP_VERSION} based on the official PHP Apache image" \
       org.opencontainers.image.licenses="MIT" \
