@@ -17,7 +17,8 @@ ENV DEVCONTAINER_SERVICE_ID=${DEVCONTAINER_SERVICE_ID}
 ENV DEVCONTAINER_SERVICE_NAME=${DEVCONTAINER_SERVICE_NAME}
 ENV TYPO3_INSTALL_WEB_SERVER_CONFIG=other
 
-LABEL dev.containers.servicetype="devcontainer" \
+LABEL dev.containers.phpversion="${PHP_VERSION}" \
+      dev.containers.servicetype="devcontainer" \
       dev.containers.serviceuser="${DEVCONTAINER_SERVICE_NAME}" \
       dev.containers.serviceuid="${DEVCONTAINER_SERVICE_ID}" \
       org.opencontainers.image.created="${IMAGE_TIMESTAMP}" \
