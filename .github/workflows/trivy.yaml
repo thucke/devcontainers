@@ -55,7 +55,7 @@ jobs:
       - name: Load ${{ env.RUNTIME_NAME }} runtime versions to process from config.json
         id: runtime-versions
         run: |
-          runtime_versions=$(jq -c --arg runtime_name "${RUNTIME_NAME}" '.ci.${runtime_name}_versions' src/${{ matrix.folder }}/config.json)
+          runtime_versions=$(jq -c --arg runtime_name "${RUNTIME_NAME}_versions" '.ci.[$runtime_name]' src/${{ matrix.folder }}/config.json)
           echo "runtime_versions=$runtime_versions" | tee $GITHUB_OUTPUT
         env:
           RUNTIME_NAME: ${{ env.RUNTIME_NAME }}
