@@ -44,14 +44,38 @@ jobs:
       - name: Create timestamp tag
         id: timestamp
         run: echo "image_timestamp=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" | tee $GITHUB_OUTPUT
-
-  build:
+  runtime-versions:
+    name: Get runtime versions
     runs-on: ubuntu-latest
     needs: preparation
     strategy:
       matrix:
         folder: ${{ fromJson(needs.preparation.outputs.folders) }}
-        php_version: [8.5, 8.4, 8.3, 8.2]
+    outputs:
+      runtime_versions: ${{ steps.runtime-versions.outputs.runtime_versions }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Read runtime name from config.json
+        id: runtime-name
+        run: |
+          runtime_name=$(jq -r '.ci.runtime_name' src/${{ matrix.folder }}/config.json)
+          echo "RUNTIME_NAME=${runtime_name}" | tee $GITHUB_ENV
+      - name: Load ${{ env.RUNTIME_NAME }} runtime versions to process from config.json
+        id: runtime-versions
+        run: |
+          runtime_versions=$(jq -c --arg runtime_name "${RUNTIME_NAME}_versions" '.ci.[$runtime_name]' src/${{ matrix.folder }}/config.json)
+          echo "runtime_versions=$runtime_versions" | tee $GITHUB_OUTPUT
+        env:
+          RUNTIME_NAME: ${{ env.RUNTIME_NAME }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [preparation, runtime-versions]
+    strategy:
+      matrix:
+        folder: ${{ fromJson(needs.preparation.outputs.folders) }}
+        runtime_version: ${{ fromJson(needs.runtime-versions.outputs.runtime_versions) }}
     permissions:
       contents: read
       packages: write
@@ -74,7 +98,7 @@ jobs:
           mode: ''
           load-mode: 'skip'
         env: 
-          PHP_VERSION: ${{ matrix.php_version }}
+          RUNTIME_VERSION: ${{ matrix.runtime_version }}
       - name: Get image base digest
         id: get-image-base-digest
         run: |
