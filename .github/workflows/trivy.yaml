@@ -48,7 +48,7 @@ jobs:
       - name: Load php versions to process from config.json
         id: php-versions
         run: |
-          php_versions=$(jq -r .ci.php_versions src/${{ matrix.folder }}/config.json)
+          php_versions=$(jq -c '.ci.php_versions' src/${{ matrix.folder }}/config.json)
           echo "php_versions=$php_versions" | tee $GITHUB_OUTPUT
   scan:
     permissions:
