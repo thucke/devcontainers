@@ -59,5 +59,4 @@ jobs:
           keep-n-tagged: 12
           exclude-tags: php-8.?-trixie
           delete-untagged: true
-          keep-n-untagged: 0
           dry-run: ${{ needs.preparation.outputs.dry_run }}
