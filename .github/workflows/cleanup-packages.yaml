@@ -33,7 +33,14 @@ jobs:
         run: echo "package=$(echo ${GITHUB_REPOSITORY@L}|cut -d/ -f2)" | tee $GITHUB_OUTPUT
       - name: Set dry run
         id: dry_run
-        run: echo "dry_run=${{ github.event_name != 'pull_request' }}" | tee $GITHUB_OUTPUT
+        run: |
+          if [[ "${GITHUB_EVENT_NAME}" =~ ^(schedule|workflow_dispatch)$ ]]; then
+            echo "This is a ${GITHUB_EVENT_NAME} event, disabling dry run mode."
+            echo "dry_run=false" | tee $GITHUB_OUTPUT
+          else
+            echo "This is a ${GITHUB_EVENT_NAME} event, enabling dry run mode."
+            echo "dry_run=true" | tee $GITHUB_OUTPUT
+          fi
   cleanup:
     runs-on: ubuntu-latest
     needs: preparation
