@@ -87,8 +87,11 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: '${{ env.REGISTRY }}/${{ needs.preparation.outputs.repo }}/${{ matrix.folder }}:${{ env.TARGET_IMAGE_BASETAG }}'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
+          #format: 'sarif'
+          #output: 'trivy-results.sarif'
+          format: 'template'
+          output: 'trivy-results.md'
+          template: "@.github/trivy-markdown.tpl"
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
         env:
@@ -96,8 +99,16 @@ jobs:
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
           INPUT_LIMIT_SEVERITIES_FOR_SARIF: true
           TARGET_IMAGE_BASETAG: ${{ env.TARGET_IMAGE_BASETAG }}
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+      - name: Upload Trivy scan results as Markdows report
         if: always()
-        with:
-          sarif_file: 'trivy-results.sarif'
+        run: |
+          echo "# Trivy Scan Results for ${{ matrix.folder }}:${{ env.TARGET_IMAGE_BASETAG }}" > ${GITHUB_STEP_SUMMARY}
+          cat trivy-results.md >> ${GITHUB_STEP_SUMMARY}
+          echo "Trivy scan results uploaded as Markdown report"
+        env:
+          TARGET_IMAGE_BASETAG: ${{ env.TARGET_IMAGE_BASETAG }}
+      #- name: Upload Trivy scan results to GitHub Security tab
+      #  uses: github/codeql-action/upload-sarif@v4
+      #  if: always()
+      #  with:
+      #    sarif_file: 'trivy-results.sarif'
