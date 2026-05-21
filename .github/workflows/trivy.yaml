@@ -102,8 +102,8 @@ jobs:
       - name: Upload Trivy scan results as Markdows report
         if: always()
         run: |
-          echo "# Trivy Scan Results for ${{ matrix.folder }}:${{ env.TARGET_IMAGE_BASETAG }}" > trivy-results.md
-          cat trivy-results.md >> trivy-results.md
+          echo "# Trivy Scan Results for ${{ matrix.folder }}:${{ env.TARGET_IMAGE_BASETAG }}" > ${GITHUB_STEP_SUMMARY}
+          cat trivy-results.md >> ${GITHUB_STEP_SUMMARY}
           echo "Trivy scan results uploaded as Markdown report"
         env:
           TARGET_IMAGE_BASETAG: ${{ env.TARGET_IMAGE_BASETAG }}
